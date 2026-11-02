@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>কৃষকের হাট</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f8f1;
+      color: #243b2a;
+    }
+    header {
+      background: #176b3a;
+      color: white;
+      padding: 22px 15px;
+      text-align: center;
+    }
+    header h1 { margin: 0; }
+    .intro {
+      text-align: center;
+      padding: 20px 12px;
+    }
+    .search {
+      display: block;
+      width: 85%;
+      max-width: 450px;
+      margin: 15px auto;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      padding: 15px;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 2px 8px #0001;
+    }
+    .emoji { font-size: 45px; text-align: center; }
+    .price { color: #176b3a; font-weight: bold; }
+    .button {
+      display: inline-block;
+      background: #176b3a;
+      color: white;
+      padding: 10px 14px;
+      border-radius: 7px;
+      text-decoration: none;
+    }
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: #e4eee2;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🌾 কৃষকের হাট</h1>
+    <p>কৃষকের পণ্য, সরাসরি আপনার কাছে</p>
+  </header>
+
+  <section class="intro">
+    <h2>স্বাগতম কৃষকের হাটে</h2>
+    <p>তাজা শাকসবজি, ফল ও কৃষিপণ্য খুঁজুন</p>
+    <input class="search" id="search" placeholder="পণ্যের নাম লিখে খুঁজুন...">
+  </section>
+
+  <section class="products" id="products">
+    <div class="card">
+      <div class="emoji">🥔</div>
+      <h3>আলু</h3>
+      <p>তাজা দেশি আলু</p>
+      <p class="price">৳ ৪০ / কেজি</p>
+    </div>
+    <div class="card">
+      <div class="emoji">🍅</div>
+      <h3>টমেটো</h3>
+      <p>সতেজ টমেটো</p>
+      <p class="price">৳ ৬০ / কেজি</p>
+    </div>
+    <div class="card">
+      <div class="emoji">🥬</div>
+      <h3>পালং শাক</h3>
+      <p>তাজা শাক</p>
+      <p class="price">৳ ৩০ / আঁটি</p>
+    </div>
+  </section>
+
+  <footer>
+    <p>পণ্য কিনতে বা বিক্রি করতে যোগাযোগ করুন</p>
+    <a class="button" href="https://m.me/61596224662178">
+      Facebook Messenger
+    </a>
+    <p>© কৃষকের হাট</p>
+  </footer>
+
+  <script>
+    document.getElementById("search").addEventListener("input", function() {
+      const word = this.value.toLowerCase();
+      document.querySelectorAll(".card").forEach(card => {
+        card.style.display = card.innerText.toLowerCase().includes(word)
+          ? "" : "none";
+      });
+    });
+  </script>
+</body>
+</html>

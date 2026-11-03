@@ -1,9 +1,12 @@
+
+
 <!DOCTYPE html>
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>কৃষকের হাট</title>
+
   <style>
     body {
       margin: 0;
@@ -11,17 +14,21 @@
       background: #f4f8f1;
       color: #243b2a;
     }
+
     header {
       background: #176b3a;
       color: white;
       padding: 22px 15px;
       text-align: center;
     }
+
     header h1 { margin: 0; }
+
     .intro {
       text-align: center;
       padding: 20px 12px;
     }
+
     .search {
       display: block;
       width: 85%;
@@ -32,20 +39,41 @@
       border-radius: 8px;
       font-size: 16px;
     }
+
     .products {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      grid-template-columns: repeat(
+        auto-fit, minmax(150px, 1fr)
+      );
       gap: 15px;
       padding: 15px;
     }
+
     .card {
       background: white;
       border-radius: 12px;
       padding: 15px;
       box-shadow: 0 2px 8px #0001;
+      overflow-wrap: anywhere;
     }
-    .emoji { font-size: 45px; text-align: center; }
-    .price { color: #176b3a; font-weight: bold; }
+
+    .emoji {
+      font-size: 45px;
+      text-align: center;
+    }
+
+    .product-image {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .price {
+      color: #176b3a;
+      font-weight: bold;
+    }
+
     .button {
       display: inline-block;
       background: #176b3a;
@@ -54,6 +82,12 @@
       border-radius: 7px;
       text-decoration: none;
     }
+
+    .message {
+      text-align: center;
+      padding: 20px;
+    }
+
     footer {
       text-align: center;
       padding: 20px;
@@ -61,55 +95,184 @@
     }
   </style>
 </head>
+
 <body>
-  <header>
-    <h1>🌾 কৃষকের হাট</h1>
-    <p>কৃষকের পণ্য, সরাসরি আপনার কাছে</p>
-  </header>
 
-  <section class="intro">
-    <h2>স্বাগতম কৃষকের হাটে</h2>
-    <p>তাজা শাকসবজি, ফল ও কৃষিপণ্য খুঁজুন</p>
-    <input class="search" id="search" placeholder="পণ্যের নাম লিখে খুঁজুন...">
-  </section>
+<header>
+  <h1>🌾 কৃষকের হাট</h1>
+  <p>কৃষকের পণ্য, সরাসরি আপনার কাছে</p>
+</header>
 
-  <section class="products" id="products">
-    <div class="card">
-      <div class="emoji">🥔</div>
-      <h3>আলু</h3>
-      <p>তাজা দেশি আলু</p>
-      <p class="price">৳ ৪০ / কেজি</p>
-    </div>
-    <div class="card">
-      <div class="emoji">🍅</div>
-      <h3>টমেটো</h3>
-      <p>সতেজ টমেটো</p>
-      <p class="price">৳ ৬০ / কেজি</p>
-    </div>
-    <div class="card">
-      <div class="emoji">🥬</div>
-      <h3>পালং শাক</h3>
-      <p>তাজা শাক</p>
-      <p class="price">৳ ৩০ / আঁটি</p>
-    </div>
-  </section>
+<section class="intro">
+  <h2>স্বাগতম কৃষকের হাটে</h2>
+  <p>তাজা শাকসবজি, ফল ও কৃষিপণ্য খুঁজুন</p>
 
-  <footer>
-    <p>পণ্য কিনতে বা বিক্রি করতে যোগাযোগ করুন</p>
-    <a class="button" href="https://m.me/61596224662178">
-      Facebook Messenger
-    </a>
-    <p>© কৃষকের হাট</p>
-  </footer>
+  <input
+    class="search"
+    id="search"
+    placeholder="পণ্যের নাম লিখে খুঁজুন..."
+  >
+</section>
 
-  <script>
-    document.getElementById("search").addEventListener("input", function() {
-      const word = this.value.toLowerCase();
-      document.querySelectorAll(".card").forEach(card => {
-        card.style.display = card.innerText.toLowerCase().includes(word)
-          ? "" : "none";
-      });
+<div class="message" id="message">
+  পণ্যের তথ্য লোড হচ্ছে...
+</div>
+
+<section class="products" id="products"></section>
+
+<footer>
+  <p>পণ্য কিনতে বা বিক্রি করতে যোগাযোগ করুন</p>
+
+  <a
+    class="button"
+    href="https://m.me/61596224662178"
+    target="_blank"
+    rel="noopener"
+  >
+    Facebook Messenger
+  </a>
+
+  <p>© কৃষকের হাট</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+  const SUPABASE_URL =
+    "https://utejgzoswdxpspiaskkq.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_IhpP2xon8VFmNvFrnclOYg_O7tE_xrv";
+
+  const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+  const productsBox =
+    document.getElementById("products");
+
+  const message =
+    document.getElementById("message");
+
+  const search =
+    document.getElementById("search");
+
+  let allProducts = [];
+
+  function createCard(product) {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    if (product.image_url) {
+      const image = document.createElement("img");
+
+      image.className = "product-image";
+      image.src = product.image_url;
+      image.alt = product.product_name || "কৃষিপণ্য";
+      image.loading = "lazy";
+
+      image.onerror = () => image.remove();
+
+      card.appendChild(image);
+    } else {
+      const emoji = document.createElement("div");
+
+      emoji.className = "emoji";
+      emoji.textContent = "🌾";
+
+      card.appendChild(emoji);
+    }
+
+    const name = document.createElement("h3");
+    name.textContent = product.product_name || "পণ্য";
+
+    const description = document.createElement("p");
+    description.textContent =
+      product.description || "তাজা কৃষিপণ্য";
+
+    const price = document.createElement("p");
+    price.className = "price";
+
+    const priceValue = Number(product.price);
+
+    price.textContent =
+      "৳ " +
+      (Number.isFinite(priceValue)
+        ? priceValue.toLocaleString("bn-BD")
+        : product.price) +
+      " / " +
+      (product.unit || "একক");
+
+    const seller = document.createElement("p");
+    seller.textContent =
+      "বিক্রেতা: " + (product.seller_name || "কৃষক");
+
+    card.appendChild(name);
+    card.appendChild(description);
+    card.appendChild(price);
+    card.appendChild(seller);
+
+    return card;
+  }
+
+  function showProducts(list) {
+    productsBox.replaceChildren();
+
+    if (list.length === 0) {
+      message.textContent = "কোনো পণ্য পাওয়া যায়নি।";
+      return;
+    }
+
+    message.textContent = "";
+
+    list.forEach(product => {
+      productsBox.appendChild(createCard(product));
     });
-  </script>
+  }
+
+  async function loadProducts() {
+    message.textContent = "পণ্যের তথ্য লোড হচ্ছে...";
+
+    const { data, error } = await db
+      .from("products")
+      .select("*");
+
+    if (error) {
+      console.error(error);
+
+      message.textContent =
+        "পণ্য লোড করা যায়নি। Supabase URL, Key এবং RLS Policy পরীক্ষা করুন।";
+
+      return;
+    }
+
+    allProducts = (data || []).filter(product =>
+      product.is_active !== false
+    );
+
+    showProducts(allProducts);
+  }
+
+  search.addEventListener("input", function() {
+    const word = this.value.trim().toLowerCase();
+
+    const filtered = allProducts.filter(product => {
+      const searchable =
+        (product.product_name || "") +
+        " " +
+        (product.category || "") +
+        " " +
+        (product.description || "");
+
+      return searchable.toLowerCase().includes(word);
+    });
+
+    showProducts(filtered);
+  });
+
+  loadProducts();
+</script>
+
 </body>
 </html>

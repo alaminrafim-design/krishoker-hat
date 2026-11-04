@@ -1,49 +1,1235 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
--- Products table: authenticated sellers can insert
-CREATE POLICY "Authenticated sellers can insert products"
-ON public.products
-FOR INSERT
-TO authenticated
-WITH CHECK (
-  auth.uid() = seller_id
+<title>কৃষকের হাট | কৃষকের পণ্য সরাসরি</title>
+
+<meta name="description"
+content="কৃষকের হাটে কৃষকের কাছ থেকে সরাসরি তাজা কৃষিপণ্য কিনুন।">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f8f1;
+  color: #243b2a;
+}
+
+header {
+  background: #176b3a;
+  color: white;
+  padding: 22px 15px;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 30px;
+}
+
+header p {
+  margin: 8px 0 0;
+}
+
+nav {
+  background: #0f512b;
+  padding: 13px 5px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+  margin: 0 8px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 20px;
+}
+
+.hero {
+  background: #e2f3df;
+  border-radius: 15px;
+  padding: 28px 15px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.hero h2 {
+  color: #176b3a;
+}
+
+.hero p {
+  line-height: 1.8;
+}
+
+.search {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #cbd9c7;
+  border-radius: 10px;
+  font-size: 16px;
+  margin-bottom: 15px;
+  background: white;
+}
+
+.section-title {
+  color: #176b3a;
+  margin-top: 25px;
+}
+
+.products {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(220px, 1fr)
+  );
+  gap: 18px;
+}
+
+.product {
+  background: white;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 3px 12px #00000012;
+}
+
+.product img {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+  background: #e5e5e5;
+}
+
+.product-info {
+  padding: 15px;
+}
+
+.product h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.price {
+  color: #176b3a;
+  font-size: 22px;
+  font-weight: bold;
+  margin: 8px 0;
+}
+
+.product p {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.category {
+  display: inline-block;
+  background: #e5f4e5;
+  color: #176b3a;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+button {
+  background: #176b3a;
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+button:hover {
+  background: #0f512b;
+}
+
+button:disabled {
+  background: #999;
+  cursor: not-allowed;
+}
+
+.product button {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.form-box {
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+  margin-top: 30px;
+  box-shadow: 0 3px 12px #00000010;
+}
+
+.form-box input,
+.form-box textarea,
+.form-box select {
+  width: 100%;
+  padding: 13px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 15px;
+  background: white;
+}
+
+.form-box textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.form-box label {
+  display: block;
+  margin-top: 12px;
+  font-weight: bold;
+}
+
+.message {
+  margin: 12px 0;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.success {
+  color: #176b3a;
+}
+
+.error {
+  color: #c62828;
+}
+
+.loading {
+  text-align: center;
+  padding: 25px;
+  color: #666;
+}
+
+.empty {
+  text-align: center;
+  padding: 25px;
+  background: white;
+  border-radius: 12px;
+}
+
+footer {
+  background: #176b3a;
+  color: white;
+  text-align: center;
+  padding: 25px 15px;
+  margin-top: 40px;
+}
+
+footer a {
+  color: white;
+}
+
+footer p {
+  line-height: 1.8;
+}
+
+@media(max-width: 500px) {
+
+  header h1 {
+    font-size: 24px;
+  }
+
+  .container {
+    padding: 12px;
+  }
+
+  nav a {
+    margin: 0 5px;
+    font-size: 12px;
+  }
+
+  .products {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .product img {
+    height: 140px;
+  }
+
+  .product-info {
+    padding: 10px;
+  }
+
+  .product h3 {
+    font-size: 15px;
+  }
+
+  .price {
+    font-size: 17px;
+  }
+
+  .product button {
+    padding: 9px;
+    font-size: 12px;
+  }
+
+  .form-box {
+    padding: 15px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🌾 কৃষকের হাট</h1>
+  <p>কৃষকের পণ্য, সরাসরি আপনার হাতে</p>
+</header>
+
+<nav>
+  <a href="#home">হোম</a>
+  <a href="#products">পণ্য</a>
+  <a href="#sell">পণ্য বিক্রি</a>
+  <a href="#contact">যোগাযোগ</a>
+</nav>
+
+<div class="container">
+
+<!-- HOME -->
+
+<section class="hero" id="home">
+
+  <h2>স্বাগতম কৃষকের হাটে</h2>
+
+  <p>
+    কৃষকের কাছ থেকে সরাসরি তাজা পণ্য কিনুন।
+    ন্যায্য দামে, সহজে ও নিরাপদে।
+  </p>
+
+</section>
+
+<!-- SEARCH -->
+
+<input
+  type="search"
+  id="search"
+  class="search"
+  placeholder="🔍 পণ্যের নাম, ক্যাটাগরি বা এলাকা লিখুন..."
+>
+
+<!-- PRODUCTS -->
+
+<section id="products">
+
+  <h2 class="section-title">
+    🛒 আজকের পণ্যসমূহ
+  </h2>
+
+  <div id="productList" class="products">
+
+    <p class="loading">
+      পণ্য লোড হচ্ছে...
+    </p>
+
+  </div>
+
+</section>
+
+<!-- SELL PRODUCT -->
+
+<section id="sell" class="form-box">
+
+  <h2 class="section-title">
+    📦 আপনার পণ্য বিক্রি করুন
+  </h2>
+
+  <p>
+    আপনার পণ্যের সঠিক তথ্য ও আসল ছবি দিয়ে পোস্ট করুন।
+  </p>
+
+  <form id="productForm">
+
+    <label for="productName">
+      পণ্যের নাম *
+    </label>
+
+    <input
+      type="text"
+      id="productName"
+      placeholder="যেমন: দেশি আলু"
+      maxlength="100"
+      required
+    >
+
+    <label for="productCategory">
+      পণ্যের ক্যাটাগরি
+    </label>
+
+    <select id="productCategory">
+
+      <option value="সবজি">সবজি</option>
+      <option value="ফল">ফল</option>
+      <option value="ধান ও চাল">ধান ও চাল</option>
+      <option value="মাছ">মাছ</option>
+      <option value="মাংস">মাংস</option>
+      <option value="দুধ ও ডিম">দুধ ও ডিম</option>
+      <option value="অন্যান্য">অন্যান্য</option>
+
+    </select>
+
+    <label for="productPrice">
+      দাম (টাকা) *
+    </label>
+
+    <input
+      type="number"
+      id="productPrice"
+      placeholder="যেমন: ৫০"
+      min="0.01"
+      step="0.01"
+      required
+    >
+
+    <label for="productUnit">
+      পরিমাণ / একক
+    </label>
+
+    <select id="productUnit">
+
+      <option value="কেজি">কেজি</option>
+      <option value="মণ">মণ</option>
+      <option value="পিস">পিস</option>
+      <option value="লিটার">লিটার</option>
+      <option value="বস্তা">বস্তা</option>
+      <option value="অন্যান্য">অন্যান্য</option>
+
+    </select>
+
+    <label for="sellerName">
+      বিক্রেতার নাম *
+    </label>
+
+    <input
+      type="text"
+      id="sellerName"
+      placeholder="আপনার নাম"
+      maxlength="100"
+      required
+    >
+
+    <label for="sellerPhone">
+      মোবাইল নম্বর *
+    </label>
+
+    <input
+      type="tel"
+      id="sellerPhone"
+      placeholder="01XXXXXXXXX"
+      maxlength="20"
+      required
+    >
+
+    <label for="sellerArea">
+      আপনার এলাকা
+    </label>
+
+    <input
+      type="text"
+      id="sellerArea"
+      placeholder="গ্রাম, উপজেলা, জেলা"
+      maxlength="200"
+    >
+
+    <label for="productDescription">
+      পণ্যের বিবরণ
+    </label>
+
+    <textarea
+      id="productDescription"
+      placeholder="পণ্যের গুণগত মান, পরিমাণ ও অন্যান্য তথ্য লিখুন..."
+      maxlength="2000"
+    ></textarea>
+
+    <label for="productImage">
+      পণ্যের আসল ছবি নির্বাচন করুন *
+    </label>
+
+    <input
+      type="file"
+      id="productImage"
+      accept="image/jpeg,image/png,image/webp"
+      required
+    >
+
+    <p>
+      <small>
+        JPG, PNG অথবা WEBP ছবি নির্বাচন করুন।
+        সর্বোচ্চ ৫ MB।
+      </small>
+    </p>
+
+    <button
+      type="submit"
+      id="submitButton"
+    >
+      পণ্য পোস্ট করুন
+    </button>
+
+    <p
+      id="formMessage"
+      class="message"
+      aria-live="polite"
+    ></p>
+
+  </form>
+
+</section>
+
+</div>
+
+<!-- FOOTER -->
+
+<footer id="contact">
+
+  <h3>🌾 কৃষকের হাট</h3>
+
+  <p>
+    কৃষক ও ক্রেতার সরাসরি সংযোগ
+  </p>
+
+  <p>
+    <a
+      href="https://m.me/61596224662178"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Facebook Messenger-এ যোগাযোগ করুন
+    </a>
+  </p>
+
+  <p>
+    © 2026 কৃষকের হাট | সর্বস্বত্ব সংরক্ষিত
+  </p>
+
+</footer>
+
+<script>
+
+// =====================================
+// SUPABASE CONNECTION
+// =====================================
+
+const SUPABASE_URL =
+  "https://utejgzoswdxpspiaskkq.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_IhpP2xon8VFmNvFrnclOYg_O7tE_xrv";
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+
+// =====================================
+// DATABASE SETTINGS
+// =====================================
+
+const TABLE_NAME = "products";
+
+const STORAGE_BUCKET = "product-images";
+
+const MESSENGER_URL =
+  "https://m.me/61596224662178";
+
+const MAX_IMAGE_SIZE =
+  5 * 1024 * 1024;
+
+
+// =====================================
+// HTML ELEMENTS
+// =====================================
+
+const productList =
+  document.getElementById("productList");
+
+const searchInput =
+  document.getElementById("search");
+
+const formMessage =
+  document.getElementById("formMessage");
+
+const submitButton =
+  document.getElementById("submitButton");
+
+const productForm =
+  document.getElementById("productForm");
+
+
+// =====================================
+// PRODUCT DATA
+// =====================================
+
+let allProducts = [];
+
+
+// =====================================
+// MESSAGE FUNCTION
+// =====================================
+
+function showMessage(element, message, type) {
+
+  element.textContent = message;
+
+  element.className =
+    "message " + type;
+
+}
+
+
+// =====================================
+// ERROR MESSAGE
+// =====================================
+
+function getErrorMessage(error) {
+
+  console.error(error);
+
+  if (!navigator.onLine) {
+    return "ইন্টারনেট সংযোগ পরীক্ষা করুন।";
+  }
+
+  if (
+    error &&
+    (
+      error.code === "42501" ||
+      error.code === "PGRST301"
+    )
+  ) {
+
+    return (
+      "অনুমতি পাওয়া যায়নি। " +
+      "Supabase RLS Policy পরীক্ষা করুন।"
+    );
+
+  }
+
+  if (
+    error &&
+    error.message &&
+    error.message.includes("Bucket")
+  ) {
+
+    return (
+      "Storage Bucket পাওয়া যায়নি। " +
+      "product-images Bucket তৈরি করুন।"
+    );
+
+  }
+
+  if (
+    error &&
+    error.message &&
+    error.message.includes("duplicate")
+  ) {
+
+    return "এই তথ্যটি আগে থেকেই রয়েছে।";
+
+  }
+
+  return (
+    "সমস্যা হয়েছে। Supabase Database, " +
+    "Storage ও Policy পরীক্ষা করুন।"
+  );
+
+}
+
+
+// =====================================
+// LOAD PRODUCTS FROM DATABASE
+// =====================================
+
+async function loadProducts() {
+
+  productList.innerHTML =
+    '<p class="loading">পণ্য লোড হচ্ছে...</p>';
+
+  try {
+
+    const { data, error } =
+      await supabaseClient
+        .from(TABLE_NAME)
+        .select(
+          "id,product_name,category,price,unit," +
+          "seller_name,phone,area,description," +
+          "image_url,status,created_at,is_active"
+        )
+        .order("created_at", {
+          ascending: false
+        });
+
+    if (error) {
+      throw error;
+    }
+
+    allProducts = data || [];
+
+    displayProducts();
+
+  } catch (error) {
+
+    productList.innerHTML = "";
+
+    const message =
+      document.createElement("p");
+
+    message.className = "empty";
+
+    message.textContent =
+      getErrorMessage(error);
+
+    productList.appendChild(message);
+
+  }
+
+}
+
+
+// =====================================
+// DISPLAY PRODUCTS
+// =====================================
+
+function displayProducts() {
+
+  productList.innerHTML = "";
+
+  const keyword =
+    searchInput.value
+      .trim()
+      .toLowerCase();
+
+  const filteredProducts =
+    allProducts.filter(product => {
+
+      // Hide inactive products
+
+      if (product.is_active === false) {
+        return false;
+      }
+
+      const name =
+        product.product_name || "";
+
+      const category =
+        product.category || "";
+
+      const area =
+        product.area || "";
+
+      return (
+        name.toLowerCase().includes(keyword) ||
+        category.toLowerCase().includes(keyword) ||
+        area.toLowerCase().includes(keyword)
+      );
+
+    });
+
+  if (filteredProducts.length === 0) {
+
+    const empty =
+      document.createElement("p");
+
+    empty.className = "empty";
+
+    empty.textContent =
+      "কোনো পণ্য পাওয়া যায়নি।";
+
+    productList.appendChild(empty);
+
+    return;
+
+  }
+
+
+  filteredProducts.forEach(product => {
+
+    const card =
+      document.createElement("div");
+
+    card.className = "product";
+
+
+    // PRODUCT IMAGE
+
+    const image =
+      document.createElement("img");
+
+    image.src =
+      product.image_url ||
+      "https://placehold.co/400x300?text=Product";
+
+    image.alt =
+      product.product_name || "পণ্য";
+
+    image.loading = "lazy";
+
+
+    // PRODUCT INFO
+
+    const info =
+      document.createElement("div");
+
+    info.className = "product-info";
+
+
+    // CATEGORY
+
+    const category =
+      document.createElement("span");
+
+    category.className = "category";
+
+    category.textContent =
+      product.category || "অন্যান্য";
+
+
+    // PRODUCT NAME
+
+    const name =
+      document.createElement("h3");
+
+    name.textContent =
+      product.product_name || "নাম নেই";
+
+
+    // PRICE
+
+    const price =
+      document.createElement("div");
+
+    price.className = "price";
+
+    const amount =
+      Number(product.price || 0);
+
+    const formattedPrice =
+      new Intl.NumberFormat("bn-BD", {
+        maximumFractionDigits: 2
+      }).format(amount);
+
+    price.textContent =
+      "৳ " + formattedPrice +
+      (product.unit ? " / " + product.unit : "");
+
+
+    // DESCRIPTION
+
+    const description =
+      document.createElement("p");
+
+    description.textContent =
+      product.description || "বিস্তারিত তথ্য নেই।";
+
+
+    // SELLER
+
+    const seller =
+      document.createElement("p");
+
+    seller.textContent =
+      "বিক্রেতা: " +
+      (product.seller_name || "কৃষক");
+
+
+    // AREA
+
+    const area =
+      document.createElement("p");
+
+    area.textContent =
+      "📍 এলাকা: " +
+      (product.area || "উল্লেখ করা হয়নি");
+
+
+    // CONTACT BUTTON
+
+    const button =
+      document.createElement("button");
+
+    button.textContent =
+      "Messenger-এ যোগাযোগ";
+
+    button.onclick = function() {
+
+      window.open(
+        MESSENGER_URL,
+        "_blank",
+        "noopener,noreferrer"
+      );
+
+    };
+
+
+    // APPEND
+
+    info.append(
+      category,
+      name,
+      price,
+      description,
+      seller,
+      area,
+      button
+    );
+
+    card.append(
+      image,
+      info
+    );
+
+    productList.appendChild(card);
+
+  });
+
+}
+
+
+// =====================================
+// SEARCH PRODUCTS
+// =====================================
+
+searchInput.addEventListener(
+  "input",
+  displayProducts
 );
 
--- Sellers can view their own products
-CREATE POLICY "Sellers can view own products"
-ON public.products
-FOR SELECT
-TO authenticated
-USING (
-  auth.uid() = seller_id
+
+// =====================================
+// UPLOAD PRODUCT IMAGE
+// =====================================
+
+async function uploadProductImage(file) {
+
+  const safeName =
+    file.name.replace(
+      /[^a-zA-Z0-9._-]/g,
+      "_"
+    );
+
+  const filePath =
+    Date.now() +
+    "_" +
+    Math.random().toString(36).substring(2, 10) +
+    "_" +
+    safeName;
+
+
+  const { data, error } =
+    await supabaseClient
+      .storage
+      .from(STORAGE_BUCKET)
+      .upload(
+        filePath,
+        file,
+        {
+          cacheControl: "3600",
+          upsert: false,
+          contentType: file.type
+        }
+      );
+
+
+  if (error) {
+    throw error;
+  }
+
+
+  const { data: publicData } =
+    supabaseClient
+      .storage
+      .from(STORAGE_BUCKET)
+      .getPublicUrl(data.path);
+
+
+  return publicData.publicUrl;
+
+}
+
+
+// =====================================
+// POST NEW PRODUCT
+// =====================================
+
+productForm.addEventListener(
+  "submit",
+  async function(event) {
+
+    event.preventDefault();
+
+
+    submitButton.disabled = true;
+
+    submitButton.textContent =
+      "পোস্ট হচ্ছে...";
+
+    showMessage(
+      formMessage,
+      "আপনার পণ্য পোস্ট হচ্ছে। অপেক্ষা করুন...",
+      "success"
+    );
+
+
+    try {
+
+      // PRODUCT NAME
+
+      const name =
+        document.getElementById("productName")
+          .value.trim();
+
+
+      // PRICE
+
+      const price =
+        Number(
+          document.getElementById("productPrice")
+            .value
+        );
+
+
+      // CATEGORY
+
+      const category =
+        document.getElementById("productCategory")
+          .value;
+
+
+      // UNIT
+
+      const unit =
+        document.getElementById("productUnit")
+          .value;
+
+
+      // SELLER NAME
+
+      const sellerName =
+        document.getElementById("sellerName")
+          .value.trim();
+
+
+      // PHONE
+
+      const sellerPhone =
+        document.getElementById("sellerPhone")
+          .value.trim();
+
+
+      // AREA
+
+      const area =
+        document.getElementById("sellerArea")
+          .value.trim();
+
+
+      // DESCRIPTION
+
+      const description =
+        document.getElementById("productDescription")
+          .value.trim();
+
+
+      // IMAGE
+
+      const imageFile =
+        document.getElementById("productImage")
+          .files[0];
+
+
+      // VALIDATION
+
+      if (!name || !sellerName || !sellerPhone) {
+
+        throw new Error(
+          "নাম ও যোগাযোগের তথ্য পূরণ করুন।"
+        );
+
+      }
+
+
+      if (!Number.isFinite(price) || price <= 0) {
+
+        throw new Error(
+          "সঠিক পণ্যের দাম লিখুন।"
+        );
+
+      }
+
+
+      if (!imageFile) {
+
+        throw new Error(
+          "পণ্যের আসল ছবি নির্বাচন করুন।"
+        );
+
+      }
+
+
+      if (imageFile.size > MAX_IMAGE_SIZE) {
+
+        throw new Error(
+          "ছবির আকার ৫ MB-এর বেশি। " +
+          "ছোট ছবি নির্বাচন করুন।"
+        );
+
+      }
+
+
+      const allowedTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/webp"
+      ];
+
+
+      if (!allowedTypes.includes(imageFile.type)) {
+
+        throw new Error(
+          "JPG, PNG অথবা WEBP ছবি নির্বাচন করুন।"
+        );
+
+      }
+
+
+      // UPLOAD IMAGE
+
+      showMessage(
+        formMessage,
+        "ছবি আপলোড হচ্ছে...",
+        "success"
+      );
+
+
+      const imageUrl =
+        await uploadProductImage(imageFile);
+
+
+      // INSERT PRODUCT INTO DATABASE
+
+      showMessage(
+        formMessage,
+        "পণ্যের তথ্য সংরক্ষণ হচ্ছে...",
+        "success"
+      );
+
+
+      const { error: insertError } =
+        await supabaseClient
+          .from(TABLE_NAME)
+          .insert([{
+
+            product_name: name,
+
+            category: category,
+
+            price: price,
+
+            unit: unit,
+
+            seller_name: sellerName,
+
+            phone: sellerPhone,
+
+            area: area,
+
+            description: description,
+
+            image_url: imageUrl
+
+          }]);
+
+
+      if (insertError) {
+        throw insertError;
+      }
+
+
+      // SUCCESS
+
+      showMessage(
+        formMessage,
+        "✅ আপনার পণ্য সফলভাবে পোস্ট হয়েছে!",
+        "success"
+      );
+
+
+      // RESET FORM
+
+      productForm.reset();
+
+
+      // RELOAD PRODUCTS
+
+      await loadProducts();
+
+
+    } catch (error) {
+
+      console.error(error);
+
+
+      showMessage(
+        formMessage,
+        error.message &&
+        (
+          error.message.includes("সঠিক") ||
+          error.message.includes("নির্বাচন") ||
+          error.message.includes("পূরণ") ||
+          error.message.includes("MB")
+        )
+          ? error.message
+          : getErrorMessage(error),
+        "error"
+      );
+
+
+    } finally {
+
+      submitButton.disabled = false;
+
+      submitButton.textContent =
+        "পণ্য পোস্ট করুন";
+
+    }
+
+  }
 );
 
--- Public can view active products
-CREATE POLICY "Public can view active products"
-ON public.products
-FOR SELECT
-TO anon, authenticated
-USING (
-  is_active = true
-);
 
--- Storage: authenticated sellers can upload images
-CREATE POLICY "Authenticated users can upload product images"
-ON storage.objects
-FOR INSERT
-TO authenticated
-WITH CHECK (
-  bucket_id = 'product-images'
-  AND (storage.foldername(name))[1] = auth.uid()::text
-);
+// =====================================
+// START WEBSITE
+// =====================================
 
--- Public can view images in product-images bucket
-CREATE POLICY "Public can view product images"
-ON storage.objects
-FOR SELECT
-TO anon, authenticated
-USING (
-  bucket_id = 'product-images'
-);
+loadProducts();
 
-    "sba</body>
+</script>
+
+</body>
 </html>
